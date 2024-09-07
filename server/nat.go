@@ -100,7 +100,7 @@ func CreateTranslationUDP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 				Version:  4,
 				IHL:      5,
 				TTL:      64,
-				Protocol: layers.IPProtocolTCP,
+				Protocol: layers.IPProtocolUDP,
 			}
 
 			udpLayer := &layers.UDP{
