@@ -14,11 +14,14 @@ type Translation struct {
 	port uint16
 	conn *net.Conn
 	ttl  time.Time
+
+	Write func(packet gopacket.Packet) error
 }
 
 type Client struct {
 	id              int
 	udpTranslations []*Translation
+	tcpTranslations []*Translation
 	handle          func([]byte)
 }
 
@@ -39,7 +42,12 @@ func (this *NAT) AddClient(handle func(data []byte)) (int, error) {
 		if client == nil {
 			newClient := Client{
 				udpTranslations: make([]*Translation, 65536),
-				handle:          handle,
+				tcpTranslations: make([]*Translation, 65536),
+				handle: func(data []byte) {
+					fmt.Println(gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default))
+
+					handle(data)
+				},
 			}
 
 			this.clients[id] = &newClient
@@ -62,72 +70,6 @@ func (this *NAT) RemoveClient(id int) error {
 	// FIXME: close all socket
 
 	return nil
-}
-
-func CreateTranslationUDP(clientIP net.IP, clientPort uint16, ip net.IP, port uint16, handle func([]byte)) (*Translation, error) {
-	newConn, err := net.Dial("udp", fmt.Sprint("%s:%x", ip.String(), port)) // TODO: format??
-
-	if err != nil {
-		return nil, errors.New("Не удалось открыть UPD соединение")
-	}
-
-	translation := Translation{
-		port: uint16(clientPort),
-		ttl:  time.Now().Add(30 * time.Second),
-		conn: &newConn,
-	}
-
-	go (func() {
-		defer newConn.Close()
-
-		for {
-			buf := make([]byte, 4096)
-			bufLen, err := newConn.Read(buf)
-
-			if err != nil {
-				fmt.Println("Ошибка при чтении клиентского UDP")
-				return
-			}
-
-			if bufLen == 0 {
-				continue
-			}
-
-			// Создание TCP и IP слоев
-			ipLayer := &layers.IPv4{
-				SrcIP:    ip,
-				DstIP:    clientIP,
-				Version:  4,
-				IHL:      5,
-				TTL:      64,
-				Protocol: layers.IPProtocolUDP,
-			}
-
-			udpLayer := &layers.UDP{
-				SrcPort: layers.UDPPort(port),
-				DstPort: layers.UDPPort(clientPort),
-			}
-
-			udpLayer.Payload = buf[:bufLen]
-
-			packetBuf := gopacket.NewSerializeBuffer()
-			opts := gopacket.SerializeOptions{}
-
-			err = gopacket.SerializeLayers(packetBuf, opts, ipLayer, udpLayer)
-
-			if err != nil {
-				fmt.Println("Ошибка сериализации:", err)
-				return
-			}
-
-			// Получение готового пакета
-			packetData := packetBuf.Bytes()
-
-			handle(packetData)
-		}
-	})()
-
-	return &translation, nil
 }
 
 func (this *NAT) WritePacket(id int, packetData []byte) error {
@@ -158,13 +100,31 @@ func (this *NAT) WritePacket(id int, packetData []byte) error {
 			translation = newTranslation
 		}
 
-		_, err := (*translation.conn).Write(udp.Payload)
+		err := translation.Write(packet)
 
 		if err != nil {
 			fmt.Println("Ошибка при записи серверного UDP")
 		}
 	} else if ip.Protocol == layers.IPProtocolTCP {
-		// TODO: TCP
+		tcp, _ := packet.Layer(layers.LayerTypeTCP).(*layers.TCP)
+
+		translation := client.tcpTranslations[tcp.SrcPort]
+		if translation == nil {
+			newTranslation, err := CreateTranslationTCP(ip.SrcIP, uint16(tcp.SrcPort), ip.DstIP, uint16(tcp.DstPort), client.handle)
+
+			if err != nil {
+				return err
+			}
+
+			client.tcpTranslations[tcp.SrcPort] = newTranslation
+			translation = newTranslation
+		}
+
+		err := translation.Write(packet)
+
+		if err != nil {
+			fmt.Println("Ошибка при записи серверного TCP")
+		}
 	} else {
 		return errors.New("Неподдерживаемый IP-протокол")
 	}

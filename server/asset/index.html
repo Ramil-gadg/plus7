@@ -49,7 +49,7 @@
       // @ts-check
       const socket = this.io();
 
-      socket.on("socket_read", function (uid, data) {
+      socket.on("in", function (uid, data) {
         $("#messages").append($("<span>").text(atob(data)));
       });
 
@@ -61,8 +61,8 @@
 
         const uid = Math.round(Math.random() * 16000000);
 
-        socket.emit("socket_open", uid, "tcp", "77.88.44.242", 443);
-        socket.emit("socket_write", uid, btoa("GET / HTTP/1.1\nHost:ya.ru\n\n"));
+        socket.emit("hello");
+        socket.emit("out", btoa("GET / HTTP/1.1\nHost:ya.ru\n\n"));
 
         return false;
       });

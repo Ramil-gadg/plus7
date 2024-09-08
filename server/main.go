@@ -107,6 +107,8 @@ func parse() {
 func main() {
 	hello()
 
+	// go listenLocal()
+
 	nat = *NewNAT()
 
 	server := socketio.NewServer(nil)

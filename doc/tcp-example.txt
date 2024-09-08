@@ -1,0 +1,72 @@
+PACKET: 68 bytes, wire length 68 cap length 68 @ 2024-09-08 18:26:33.102939 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..64..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..44..] Version=4 IHL=5 TOS=0 Length=64 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (44 bytes) = TCP      {Contents=[..44..] Payload=[] SrcPort=64271 DstPort=8000(irdmi) Seq=2009289708 Ack=0 DataOffset=11 FIN=false SYN=true RST=false PSH=false ACK=false URG=false ECE=false CWR=false NS=false Window=65535 Checksum=65076 Urgent=0 Options=[..8..] Padding=[0]}
+
+PACKET: 68 bytes, wire length 68 cap length 68 @ 2024-09-08 18:26:33.10308 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..64..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..44..] Version=4 IHL=5 TOS=0 Length=64 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (44 bytes) = TCP      {Contents=[..44..] Payload=[] SrcPort=8000(irdmi) DstPort=64271 Seq=1171306899 Ack=2009289709 DataOffset=11 FIN=false SYN=true RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=65535 Checksum=65076 Urgent=0 Options=[..8..] Padding=[0]}
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.1031 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=64271 DstPort=8000(irdmi) Seq=2009289709 Ack=1171306900 DataOffset=8 FIN=false SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6379 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:520186190/3123533299 0x1f01694eba2d55f3)] Padding=[]}
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.103111 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=8000(irdmi) DstPort=64271 Seq=1171306900 Ack=2009289709 DataOffset=8 FIN=false SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6379 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:3123533299/520186190 0xba2d55f31f01694e)] Padding=[]}
+
+PACKET: 133 bytes, wire length 133 cap length 133 @ 2024-09-08 18:26:33.103171 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..129..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..109..] Version=4 IHL=5 TOS=0 Length=129 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[..77..] SrcPort=64271 DstPort=8000(irdmi) Seq=2009289709 Ack=1171306900 DataOffset=8 FIN=false SYN=false RST=false PSH=true ACK=true URG=false ECE=false CWR=false NS=false Window=6379 Checksum=65141 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:520186190/3123533299 0x1f01694eba2d55f3)] Padding=[]}
+- Layer 4 (77 bytes) = Payload  77 byte(s)
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.103191 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=8000(irdmi) DstPort=64271 Seq=1171306900 Ack=2009289786 DataOffset=8 FIN=false SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6378 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:3123533299/520186190 0xba2d55f31f01694e)] Padding=[]}
+
+PACKET: 754 bytes, wire length 754 cap length 754 @ 2024-09-08 18:26:33.106089 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..750..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..730..] Version=4 IHL=5 TOS=0 Length=750 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[..698..] SrcPort=8000(irdmi) DstPort=64271 Seq=1171306900 Ack=2009289786 DataOffset=8 FIN=false SYN=false RST=false PSH=true ACK=true URG=false ECE=false CWR=false NS=false Window=6378 Checksum=227 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:3123533302/520186190 0xba2d55f61f01694e)] Padding=[]}
+- Layer 4 (698 bytes) = Payload 698 byte(s)
+
+PACKET: 1141 bytes, wire length 1141 cap length 1141 @ 2024-09-08 18:26:33.106104 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..1137..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..1117..] Version=4 IHL=5 TOS=0 Length=1137 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[..1085..] SrcPort=8000(irdmi) DstPort=64271 Seq=1171307598 Ack=2009289786 DataOffset=8 FIN=false SYN=false RST=false PSH=true ACK=true URG=false ECE=false CWR=false NS=false Window=6378 Checksum=614 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:3123533302/520186190 0xba2d55f61f01694e)] Padding=[]}
+- Layer 4 (1085 bytes) = Payload        1085 byte(s)
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.106115 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=64271 DstPort=8000(irdmi) Seq=2009289786 Ack=1171307598 DataOffset=8 FIN=false SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6368 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:520186193/3123533302 0x1f016951ba2d55f6)] Padding=[]}
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.106124 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=64271 DstPort=8000(irdmi) Seq=2009289786 Ack=1171308683 DataOffset=8 FIN=false SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6351 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:520186193/3123533302 0x1f016951ba2d55f6)] Padding=[]}
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.106252 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=64271 DstPort=8000(irdmi) Seq=2009289786 Ack=1171308683 DataOffset=8 FIN=true SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6351 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:520186193/3123533302 0x1f016951ba2d55f6)] Padding=[]}
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.106274 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=8000(irdmi) DstPort=64271 Seq=1171308683 Ack=2009289787 DataOffset=8 FIN=false SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6378 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:3123533302/520186193 0xba2d55f61f016951)] Padding=[]}
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.106288 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=8000(irdmi) DstPort=64271 Seq=1171308683 Ack=2009289787 DataOffset=8 FIN=true SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6378 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:3123533302/520186193 0xba2d55f61f016951)] Padding=[]}
+
+PACKET: 56 bytes, wire length 56 cap length 56 @ 2024-09-08 18:26:33.106314 +0300 MSK
+- Layer 1 (04 bytes) = Loopback {Contents=[2, 0, 0, 0] Payload=[..52..] Family=IPv4}
+- Layer 2 (20 bytes) = IPv4     {Contents=[..20..] Payload=[..32..] Version=4 IHL=5 TOS=0 Length=52 Id=0 Flags=DF FragOffset=0 TTL=64 Protocol=TCP Checksum=0 SrcIP=127.0.0.1 DstIP=127.0.0.1 Options=[] Padding=[]}
+- Layer 3 (32 bytes) = TCP      {Contents=[..32..] Payload=[] SrcPort=64271 DstPort=8000(irdmi) Seq=2009289787 Ack=1171308684 DataOffset=8 FIN=false SYN=false RST=false PSH=false ACK=true URG=false ECE=false CWR=false NS=false Window=6351 Checksum=65064 Urgent=0 Options=[TCPOption(NOP:), TCPOption(NOP:), TCPOption(Timestamps:520186193/3123533302 0x1f016951ba2d55f6)] Padding=[]}
