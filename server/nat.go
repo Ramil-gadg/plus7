@@ -44,7 +44,7 @@ func (this *NAT) AddClient(handle func(data []byte)) (int, error) {
 				udpTranslations: make([]*Translation, 65536),
 				tcpTranslations: make([]*Translation, 65536),
 				handle: func(data []byte) {
-					fmt.Println(gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default))
+					fmt.Println("<<<", gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default))
 
 					handle(data)
 				},
@@ -81,9 +81,13 @@ func (this *NAT) WritePacket(id int, packetData []byte) error {
 
 	packet := gopacket.NewPacket(packetData, layers.LayerTypeIPv4, gopacket.Default)
 
-	fmt.Println(packet)
-
 	ip, _ := packet.Layer(layers.LayerTypeIPv4).(*layers.IPv4)
+
+	if ip == nil || ip.DstIP.String() != "79.174.82.122" {
+		return nil // TODO:
+	}
+
+	fmt.Println(">>>", packet)
 
 	if ip.Protocol == layers.IPProtocolUDP {
 		udp, _ := packet.Layer(layers.LayerTypeUDP).(*layers.UDP)
