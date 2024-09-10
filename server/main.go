@@ -45,7 +45,7 @@ func listenLocal() {
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
 		// Вывод информации о пакете
-		fmt.Println(packet)
+		fmt.Println("SPY >>>", packet)
 	}
 }
 
