@@ -15,14 +15,15 @@ type Translation struct {
 	conn *net.Conn
 	ttl  time.Time
 
-	Write func(packet gopacket.Packet) error
+	channel chan gopacket.Packet
 }
 
 type Client struct {
 	id              int
 	udpTranslations []*Translation
 	tcpTranslations []*Translation
-	handle          func([]byte)
+
+	channel chan []byte
 }
 
 type NAT struct {
@@ -37,18 +38,26 @@ func NewNAT() *NAT {
 	return &nat
 }
 
-func (this *NAT) AddClient(handle func(data []byte)) (int, error) {
+func (this *NAT) AddClient(toClientChannel chan []byte) (int, error) {
 	for id, client := range this.clients {
 		if client == nil {
+			toClientInterceptorChannel := make(chan []byte)
+
 			newClient := Client{
 				udpTranslations: make([]*Translation, 65536),
 				tcpTranslations: make([]*Translation, 65536),
-				handle: func(data []byte) {
+				channel:         toClientInterceptorChannel,
+			}
+
+			go func() {
+				for {
+					data := <-toClientInterceptorChannel
+
 					fmt.Println("<<<", gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default))
 
-					handle(data)
-				},
-			}
+					toClientChannel <- data
+				}
+			}()
 
 			this.clients[id] = &newClient
 			return id, nil
@@ -94,7 +103,7 @@ func (this *NAT) WritePacket(id int, packetData []byte) error {
 
 		translation := client.udpTranslations[udp.SrcPort]
 		if translation == nil {
-			newTranslation, err := CreateTranslationUDP(ip.SrcIP, uint16(udp.SrcPort), ip.DstIP, uint16(udp.DstPort), client.handle)
+			newTranslation, err := CreateTranslationUDP(ip.SrcIP, uint16(udp.SrcPort), ip.DstIP, uint16(udp.DstPort), client.channel)
 
 			if err != nil {
 				return err
@@ -104,17 +113,13 @@ func (this *NAT) WritePacket(id int, packetData []byte) error {
 			translation = newTranslation
 		}
 
-		err := translation.Write(packet)
-
-		if err != nil {
-			fmt.Println("Ошибка при записи серверного UDP")
-		}
+		translation.channel <- packet
 	} else if ip.Protocol == layers.IPProtocolTCP {
 		tcp, _ := packet.Layer(layers.LayerTypeTCP).(*layers.TCP)
 
 		translation := client.tcpTranslations[tcp.SrcPort]
 		if translation == nil {
-			newTranslation, err := CreateTranslationTCP(ip.SrcIP, uint16(tcp.SrcPort), ip.DstIP, uint16(tcp.DstPort), client.handle)
+			newTranslation, err := CreateTranslationTCP(ip.SrcIP, uint16(tcp.SrcPort), ip.DstIP, uint16(tcp.DstPort), client.channel)
 
 			if err != nil {
 				return err
@@ -124,11 +129,7 @@ func (this *NAT) WritePacket(id int, packetData []byte) error {
 			translation = newTranslation
 		}
 
-		err := translation.Write(packet)
-
-		if err != nil {
-			fmt.Println("Ошибка при записи серверного TCP")
-		}
+		translation.channel <- packet
 	} else {
 		return errors.New("Неподдерживаемый IP-протокол")
 	}

@@ -116,15 +116,22 @@ func main() {
 	server.OnConnect("/", func(client socketio.Conn) error {
 		log.Println("Подключен клиент ID:", client.ID())
 
-		id, err := nat.AddClient(func(data []byte) {
-			client.Emit("in", data)
-		})
+		toClientChannel := make(chan []byte)
+
+		id, err := nat.AddClient(toClientChannel)
 
 		if err != nil {
 			return err
 		}
 
 		client.SetContext(id)
+
+		go func() {
+			for {
+				data := <-toClientChannel
+				client.Emit("in", data)
+			}
+		}()
 
 		return nil
 	})

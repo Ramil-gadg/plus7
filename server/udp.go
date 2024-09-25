@@ -10,26 +10,34 @@ import (
 	"github.com/google/gopacket/layers"
 )
 
-func CreateTranslationUDP(clientIP net.IP, clientPort uint16, ip net.IP, port uint16, handle func([]byte)) (*Translation, error) {
+func CreateTranslationUDP(clientIP net.IP, clientPort uint16, ip net.IP, port uint16, toClientChannel chan []byte) (*Translation, error) {
 	newConn, err := net.Dial("udp", fmt.Sprint(ip.String(), ":", port)) // TODO: format??
 
 	if err != nil {
 		return nil, errors.New("Не удалось открыть UPD соединение: " + err.Error())
 	}
 
-	handleWrite := func(packet gopacket.Packet) error {
-		udp, _ := packet.Layer(layers.LayerTypeUDP).(*layers.UDP)
+	fromClientChannel := make(chan gopacket.Packet)
 
-		_, err := newConn.Write(udp.Payload)
+	go func() error {
+		for {
+			packet := <-fromClientChannel
 
-		return err
-	}
+			udp, _ := packet.Layer(layers.LayerTypeUDP).(*layers.UDP)
+
+			_, err := newConn.Write(udp.Payload)
+
+			if err != nil {
+				fmt.Println("Ошибка при записи клиентского UDP")
+			}
+		}
+	}()
 
 	translation := Translation{
-		port:  uint16(clientPort),
-		ttl:   time.Now().Add(30 * time.Second), // FIXME: Реализовать TTL
-		conn:  &newConn,
-		Write: handleWrite,
+		port:    uint16(clientPort),
+		ttl:     time.Now().Add(30 * time.Second), // FIXME: Реализовать TTL
+		conn:    &newConn,
+		channel: fromClientChannel,
 	}
 
 	go (func() {
@@ -71,7 +79,7 @@ func CreateTranslationUDP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 			}
 
 			packetBuf := gopacket.NewSerializeBuffer()
-			err = gopacket.SerializeLayers(packetBuf, opts, ipLayer, udpLayer)
+			err = gopacket.SerializeLayers(packetBuf, opts, ipLayer, udpLayer, gopacket.Payload(udpLayer.Payload))
 
 			if err != nil {
 				fmt.Println("Ошибка сериализации:", err)
@@ -80,7 +88,7 @@ func CreateTranslationUDP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 
 			packetData := packetBuf.Bytes()
 
-			handle(packetData)
+			toClientChannel <- packetData
 		}
 	})()
 

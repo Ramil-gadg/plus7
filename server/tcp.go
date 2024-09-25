@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/google/gopacket"
@@ -51,7 +52,7 @@ func CreatePacketDataTCP(srcIP net.IP, srcPort uint16, dstIP net.IP, dstPort uin
 	return packetBuf.Bytes(), nil
 }
 
-func CreateTranslationTCP(clientIP net.IP, clientPort uint16, ip net.IP, port uint16, handle func([]byte)) (*Translation, error) {
+func CreateTranslationTCP(clientIP net.IP, clientPort uint16, ip net.IP, port uint16, toClientChannel chan []byte) (*Translation, error) {
 	newConn, err := net.Dial("tcp", fmt.Sprint(ip, ":", port))
 
 	if err != nil {
@@ -63,89 +64,104 @@ func CreateTranslationTCP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 	var a uint32 = 0
 	var b uint32 = rand.Uint32() & 0xFFFFFF
 
-	handleWrite := func(packet gopacket.Packet) error {
-		tcp, _ := packet.Layer(layers.LayerTypeTCP).(*layers.TCP)
+	mu := sync.Mutex{}
 
-		/*
+	fromClientChannel := make(chan gopacket.Packet)
 
-			1. Я получаю SYN пакет с A=Seq
-				- Устанавливаю целевое соединение. Если оно установлено
-			2. Я передаю клиенту SYN-ACK. Ack=A+1, Seq=B=random()
-			3. Я получаю Seq=A+1, Ack=B+1
+	go func() {
+		for {
+			packet := <-fromClientChannel
+			{
+				mu.Lock()
+				defer mu.Unlock()
 
-		*/
+				tcp, _ := packet.Layer(layers.LayerTypeTCP).(*layers.TCP)
 
-		if state == TCPState_INIT && tcp.SYN {
-			state = TCPState_SYN_SENT
+				/*
 
-			a = tcp.Seq + 1
+					1. Я получаю SYN пакет с A=Seq
+						- Устанавливаю целевое соединение. Если оно установлено
+					2. Я передаю клиенту SYN-ACK. Ack=A+1, Seq=B=random()
+					3. Я получаю Seq=A+1, Ack=B+1
 
-			packetData, err := CreatePacketDataTCP(ip, port, clientIP, clientPort, &layers.TCP{
-				SrcPort: layers.TCPPort(port),
-				DstPort: layers.TCPPort(clientPort),
-				Seq:     b,
-				Ack:     a,
-				SYN:     true,
-				ACK:     true,
-				Window:  65535,
-			})
+				*/
 
-			if err != nil {
-				return err
+				if state == TCPState_INIT && tcp.SYN {
+					state = TCPState_SYN_SENT
+
+					a = tcp.Seq + 1
+
+					packetData, err := CreatePacketDataTCP(ip, port, clientIP, clientPort, &layers.TCP{
+						SrcPort: layers.TCPPort(port),
+						DstPort: layers.TCPPort(clientPort),
+						Seq:     b,
+						Ack:     a,
+						SYN:     true,
+						ACK:     true,
+						Window:  65535,
+					})
+
+					if err != nil {
+						fmt.Println("Ошибка TCP:", err.Error())
+						return
+					}
+
+					toClientChannel <- packetData
+					b += 1
+				} else if state == TCPState_SYN_SENT && tcp.ACK {
+					state = TCPState_ESTABLISHED
+
+					packetData, err := CreatePacketDataTCP(ip, port, clientIP, clientPort, &layers.TCP{
+						SrcPort: layers.TCPPort(port),
+						DstPort: layers.TCPPort(clientPort),
+						Seq:     b,
+						Ack:     a,
+						ACK:     true,
+						Window:  65535,
+					})
+
+					if err != nil {
+						fmt.Println("Ошибка TCP:", err.Error())
+						return
+					}
+
+					toClientChannel <- packetData
+				} else if state == TCPState_ESTABLISHED && tcp.PSH {
+					a = tcp.Seq
+					a += uint32(len(tcp.Payload))
+
+					newConn.Write(tcp.Payload)
+					fmt.Println("WRITE OUT:", string(tcp.Payload))
+
+					packetData, err := CreatePacketDataTCP(ip, port, clientIP, clientPort, &layers.TCP{
+						SrcPort: layers.TCPPort(port),
+						DstPort: layers.TCPPort(clientPort),
+						Seq:     b,
+						Ack:     a,
+						ACK:     true,
+						Window:  65535,
+					})
+
+					if err != nil {
+						fmt.Println("Ошибка TCP:", err.Error())
+						return
+					}
+
+					toClientChannel <- packetData
+				} else if state == TCPState_ESTABLISHED && tcp.FIN {
+					// TODO: connOpened ? fin-wait-1 : fin-wait-2
+				}
+
+				return
 			}
-
-			handle(packetData)
-			b += 1
-		} else if state == TCPState_SYN_SENT && tcp.ACK {
-			state = TCPState_ESTABLISHED
-
-			packetData, err := CreatePacketDataTCP(ip, port, clientIP, clientPort, &layers.TCP{
-				SrcPort: layers.TCPPort(port),
-				DstPort: layers.TCPPort(clientPort),
-				Seq:     b,
-				Ack:     a,
-				ACK:     true,
-				Window:  65535,
-			})
-
-			if err != nil {
-				return err
-			}
-
-			handle(packetData)
-		} else if state == TCPState_ESTABLISHED && tcp.PSH {
-			a = tcp.Seq
-			a += uint32(len(tcp.Payload))
-
-			newConn.Write(tcp.Payload)
-			fmt.Println("WRITE OUT:", string(tcp.Payload))
-
-			packetData, err := CreatePacketDataTCP(ip, port, clientIP, clientPort, &layers.TCP{
-				SrcPort: layers.TCPPort(port),
-				DstPort: layers.TCPPort(clientPort),
-				Seq:     b,
-				Ack:     a,
-				ACK:     true,
-				Window:  65535,
-			})
-
-			if err != nil {
-				return err
-			}
-
-			handle(packetData)
-		} else if state == TCPState_ESTABLISHED && tcp.FIN {
-			// TODO: connOpened ? fin-wait-1 : fin-wait-2
 		}
-
-		return nil
-	}
+	}()
 
 	translation := Translation{
-		port:  uint16(clientPort),
-		ttl:   time.Now().Add(30 * time.Second), // FIXME: Реализовать TTL
-		conn:  &newConn,
-		Write: handleWrite,
+		port:    uint16(clientPort),
+		ttl:     time.Now().Add(30 * time.Second), // FIXME: Реализовать TTL
+		conn:    &newConn,
+		channel: fromClientChannel,
 	}
 
 	go (func() {
@@ -166,6 +182,9 @@ func CreateTranslationTCP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 				continue
 			}
 
+			mu.Lock()
+			defer mu.Unlock()
+
 			tcpLayer := &layers.TCP{
 				SrcPort: layers.TCPPort(port),
 				DstPort: layers.TCPPort(clientPort),
@@ -184,7 +203,7 @@ func CreateTranslationTCP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 				return
 			}
 
-			handle(packetData)
+			toClientChannel <- packetData
 			b += uint32(bufLen)
 		}
 
