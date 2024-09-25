@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"sync"
 	"time"
 
 	"github.com/google/gopacket"
@@ -64,9 +63,12 @@ func CreateTranslationTCP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 	var a uint32 = 0
 	var b uint32 = rand.Uint32() & 0xFFFFFF
 
-	mu := sync.Mutex{}
+	// FIXME: Нужно атомарное управление счетчиками последовательностей
+	// mu := sync.Mutex{}
 
 	processClientsPacket := func(packet gopacket.Packet) error {
+		// mu.Lock()
+		// defer mu.Unlock()
 
 		tcp, _ := packet.Layer(layers.LayerTypeTCP).(*layers.TCP)
 
@@ -172,19 +174,44 @@ func CreateTranslationTCP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 			buf := make([]byte, 64000)
 			bufLen, err := newConn.Read(buf)
 
+			// mu.Lock()
+			// defer mu.Unlock()
+
 			if err != nil {
 				fmt.Println("Ошибка при чтении установленного TCP:", err.Error())
+
+				// TODO: нужна синхронизация с закрытием со стороны клиента
+				if state == TCPState_ESTABLISHED {
+					tcpLayer := &layers.TCP{
+						SrcPort: layers.TCPPort(port),
+						DstPort: layers.TCPPort(clientPort),
+						Seq:     b,
+						Ack:     a,
+						FIN:     true,
+						ACK:     true,
+						Window:  65535,
+					}
+					tcpLayer.Payload = buf[:bufLen]
+
+					packetData, err := CreatePacketDataTCP(ip, port, clientIP, clientPort, tcpLayer)
+
+					if err != nil {
+						fmt.Println("Ошибка:", err)
+					}
+
+					toClientChannel <- packetData
+
+					// TODO: что дальше??
+				}
+
 				return
 			}
 
-			fmt.Println("READ FROM OUT:", string(buf[:bufLen]))
+			fmt.Println("READ FROM OUT", bufLen, ":", string(buf[:bufLen]))
 
 			if bufLen == 0 {
 				continue
 			}
-
-			mu.Lock()
-			defer mu.Unlock()
 
 			tcpLayer := &layers.TCP{
 				SrcPort: layers.TCPPort(port),
@@ -208,7 +235,7 @@ func CreateTranslationTCP(clientIP net.IP, clientPort uint16, ip net.IP, port ui
 			b += uint32(bufLen)
 		}
 
-		//TODO: fin
+		// TODO: все почистить
 	})()
 
 	return &translation, nil

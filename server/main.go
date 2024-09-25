@@ -137,11 +137,13 @@ func main() {
 	})
 
 	server.OnEvent("/", "out", func(client socketio.Conn, data []byte) {
-		err := nat.WritePacket(client.Context().(int), data)
+		go func() {
+			err := nat.WritePacket(client.Context().(int), data)
 
-		if err != nil {
-			log.Println("Ошибка при обработке пакета:", client.ID(), "Сообщение:", err)
-		}
+			if err != nil {
+				log.Println("Ошибка при обработке пакета:", client.ID(), "Сообщение:", err)
+			}
+		}()
 	})
 
 	server.OnError("/", func(client socketio.Conn, err error) {
